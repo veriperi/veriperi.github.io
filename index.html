@@ -1,48 +1,868 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v. — data engineer / genai</title>
+<meta name="description" content="portfolio of v., data analyst transitioning into data engineering & generative ai.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f5f1;
+    --paper-line:#dedcd4;
+    --ink:#141311;
+    --ink-soft:#2f2d28;
+    --ink-faint:#77746c;
+    --stamp-red:#a8391f;
+    --stamp-red-soft:#a8391f66;
+    --card:#efeee8;
+    --mono-display:'Courier Prime', 'IBM Plex Mono', monospace;
+    --mono-body:'IBM Plex Mono', monospace;
+    --dur:0.6s;
+  }
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
 
-    Fore more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  -->
-  <base href="https://github.com/veriperi/veriperi.github.io.git">
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 2.1em;
+    color:var(--ink);
+    font-family:var(--mono-body);
+    font-size:16px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  ::selection{ background:var(--ink); color:var(--paper); }
 
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="sellar_e_commerce">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  a{ color:inherit; }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png" />
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:0 40px;
+  }
 
-  <title>sellar_e_commerce</title>
-  <link rel="manifest" href="manifest.json">
+  /* full-bleed ledger margins — fill wide viewports instead of leaving dead gutters */
+  .margin-rule{
+    display:none;
+    position:fixed;
+    top:0; bottom:0;
+    width:1px;
+    background:var(--paper-line);
+    z-index:1;
+    pointer-events:none;
+  }
+  .margin-rule.left{ left:calc(50% - 620px); }
+  .margin-rule.right{ right:calc(50% - 620px); }
+  .margin-rule span{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-90deg);
+    white-space:nowrap;
+    font-size:10.5px;
+    letter-spacing:.25em;
+    color:var(--ink-faint);
+    background:var(--paper);
+    padding:6px 0;
+  }
+  @media (min-width:1220px){
+    .margin-rule{ display:block; }
+  }
+
+  /* ---------- top bar / record header ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:var(--paper);
+    border-bottom:1px solid var(--ink);
+  }
+  .topbar-inner{
+    max-width:920px; margin:0 auto; padding:14px 40px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px; letter-spacing:.04em;
+  }
+  .topbar-id{ color:var(--ink-soft); }
+  .topbar-id b{ color:var(--ink); font-weight:600; }
+  .topbar-id .self-tag{
+    position:relative;
+    cursor:help;
+    border-bottom:1px dotted var(--stamp-red);
+  }
+  .topbar-id .self-tag .note{
+    position:absolute;
+    top:calc(100% + 10px); left:0;
+    width:220px;
+    background:var(--paper);
+    border:1px solid var(--stamp-red);
+    color:var(--stamp-red);
+    font-size:11px;
+    line-height:1.5;
+    font-weight:600;
+    padding:9px 10px;
+    opacity:0;
+    transform:translateY(-4px);
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:60;
+  }
+  .topbar-id .self-tag .note::before{ content:'✎ '; }
+  .topbar-id .self-tag:hover .note,
+  .topbar-id .self-tag:focus .note{ opacity:1; transform:translateY(0); }
+  .topbar-nav{ display:flex; gap:18px; }
+  .topbar-nav a{ text-decoration:none; color:var(--ink-soft); position:relative; }
+  .topbar-nav a:hover{ color:var(--ink); }
+  .topbar-nav a::before{ content:'· '; color:var(--stamp-red); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:96px 0 64px;
+    border-bottom:1px solid var(--ink);
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:.12em; color:var(--ink-faint);
+    margin:0 0 22px;
+  }
+  .eyebrow::before{ content:'// '; color:var(--stamp-red); }
+
+  .type-line{
+    font-family:var(--mono-display);
+    font-size:clamp(28px, 5.4vw, 46px);
+    font-weight:700;
+    line-height:1.28;
+    margin:0;
+    white-space:pre-wrap;
+  }
+  .cursor{
+    display:inline-block;
+    width:.52em; height:.92em;
+    background:var(--ink);
+    margin-left:.06em;
+    transform:translateY(.14em);
+    animation:blink 1s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .hero-sub{
+    margin:26px 0 0;
+    color:var(--ink-soft);
+    max-width:52ch;
+    font-size:15px;
+  }
+
+  .hero-meta{
+    margin-top:40px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(120px,auto));
+    gap:26px;
+    font-size:12px;
+  }
+  .hero-meta div span{ display:block; }
+  .hero-meta .k{ color:var(--ink-faint); letter-spacing:.06em; }
+  .hero-meta .v{ color:var(--ink); margin-top:3px; font-weight:600; }
+
+  /* ---------- section scaffolding ---------- */
+  section{ padding:64px 0; border-bottom:1px solid var(--paper-line); }
+  section:last-of-type{ border-bottom:none; }
+
+  .field-label{
+    font-size:12px;
+    letter-spacing:.1em;
+    color:var(--ink-faint);
+    margin:0 0 22px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .field-label::after{
+    content:''; flex:1; height:1px; background:var(--paper-line);
+  }
+  .field-label b{ color:var(--ink); }
+
+  h2.stitle{
+    font-family:var(--mono-display);
+    font-size:26px;
+    margin:0 0 20px;
+    font-weight:700;
+  }
+
+  /* ---------- about ---------- */
+  .about-body p{ color:var(--ink-soft); max-width:58ch; font-size:15.5px; font-weight:500; line-height:1.8; }
+  .about-body p:first-child{ color:var(--ink); font-weight:600; }
+
+  .annotate{
+    text-decoration:underline;
+    text-decoration-style:dotted;
+    text-decoration-color:var(--stamp-red);
+    text-underline-offset:3px;
+    cursor:help;
+    position:relative;
+    color:var(--ink);
+    font-weight:600;
+  }
+  .annotate .note{
+    position:absolute;
+    left:0; bottom:calc(100% + 8px);
+    width:max-content;
+    max-width:220px;
+    background:var(--paper);
+    border:1px solid var(--stamp-red);
+    color:var(--stamp-red);
+    font-size:11.5px;
+    font-family:var(--mono-body);
+    font-weight:600;
+    line-height:1.4;
+    padding:8px 10px;
+    transform:rotate(-1.5deg) translateY(4px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:5;
+  }
+  .annotate .note::before{
+    content:'✎ ';
+  }
+  .annotate:hover .note,
+  .annotate:focus .note{
+    opacity:1;
+    transform:rotate(-1.5deg) translateY(0);
+  }
+  @media (max-width:640px){
+    .annotate .note{ left:auto; right:0; }
+  }
+
+  .stack-grid{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:10px 18px;
+  }
+  .stack-item{
+    font-size:13px;
+    padding:9px 0;
+    border-bottom:1px dashed var(--paper-line);
+    color:var(--ink-soft);
+    display:flex; justify-content:space-between;
+  }
+  .stack-item .ok{ color:var(--stamp-red); font-size:11px; }
+
+  /* ---------- live validator ---------- */
+  .validator{
+    margin-top:48px;
+    border:1px solid var(--ink);
+    background:var(--card);
+    padding:22px 24px 24px;
+  }
+  .validator .field-label{ margin-bottom:14px; }
+  .validator-intro{
+    margin:0 0 16px; font-size:13.5px; color:var(--ink-soft); font-weight:500;
+  }
+  .dq-schema{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin:0 0 18px;
+  }
+  .dq-tag{
+    font-size:10.5px; letter-spacing:.06em;
+    border:1px solid var(--ink-faint);
+    color:var(--ink-soft);
+    padding:4px 9px;
+    text-transform:uppercase;
+  }
+  .validator-input{
+    width:100%;
+    font-family:var(--mono-body);
+    font-size:14.5px;
+    background:var(--paper);
+    border:1px solid var(--ink-faint);
+    padding:11px 12px;
+    color:var(--ink);
+    outline:none;
+  }
+  .validator-input:focus{ border-color:var(--stamp-red); }
+  .val-report{
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px dashed var(--ink-faint);
+    font-size:13px;
+    min-height:22px;
+  }
+  .val-idle{ color:var(--ink-faint); }
+  .val-line{
+    display:flex; justify-content:space-between; gap:12px;
+    padding:5px 0;
+    color:var(--ink-soft);
+  }
+  .val-line .dim{ color:var(--ink-faint); text-transform:uppercase; font-size:10.5px; letter-spacing:.05em; min-width:96px; }
+  .val-line .ok{ color:#3f6b3f; }
+  .val-line .warn{ color:var(--stamp-red); }
+  .val-score{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:12px; padding-top:12px;
+    border-top:1px solid var(--ink-faint);
+    font-size:12.5px; color:var(--ink-soft);
+  }
+  .val-score .num{ font-size:20px; font-weight:700; color:var(--ink); }
+  .val-verdict{
+    margin-top:10px;
+    display:inline-block;
+    border:2px solid var(--ink);
+    padding:4px 10px;
+    font-size:11px;
+    letter-spacing:.1em;
+    font-weight:700;
+    transform:rotate(-2deg);
+  }
+  .val-verdict.pass{ border-color:#3f6b3f; color:#3f6b3f; }
+  .val-verdict.warn{ border-color:#a87b1f; color:#a87b1f; }
+  .val-verdict.fail{ border-color:var(--stamp-red); color:var(--stamp-red); }
+
+  /* ---------- projects: record card ---------- */
+  .record{
+    border:1px solid var(--ink);
+    background:var(--card);
+    padding:0;
+    position:relative;
+    overflow:hidden;
+  }
+  .record-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:22px 24px;
+    border-bottom:1px dashed var(--ink-faint);
+    gap:16px;
+  }
+  .record-head h3{
+    font-family:var(--mono-display);
+    font-size:21px; margin:0;
+  }
+  .stamp{
+    border:2px solid var(--stamp-red);
+    color:var(--stamp-red);
+    font-size:11px;
+    letter-spacing:.1em;
+    padding:5px 10px;
+    transform:rotate(-4deg);
+    white-space:nowrap;
+    font-weight:700;
+    flex-shrink:0;
+  }
+
+  .record-fields{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    border-bottom:1px dashed var(--ink-faint);
+  }
+  .rfield{
+    padding:14px 24px;
+    border-right:1px dashed var(--ink-faint);
+    font-size:12.5px;
+  }
+  .rfield:nth-child(2n){ border-right:none; }
+  .rfield .k{ color:var(--ink-faint); letter-spacing:.06em; display:block; margin-bottom:4px; }
+  .rfield .v{ color:var(--ink); }
+
+  .record-body{ padding:22px 24px; }
+  .record-body p{ margin:0 0 16px; color:var(--ink-soft); font-size:15px; font-weight:500; }
+  .record-body p:last-of-type{ margin-bottom:0; }
+
+  .finding{
+    margin:18px 0 0;
+    padding:14px 16px;
+    background:var(--paper);
+    border-left:3px solid var(--stamp-red);
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .finding .flabel{
+    display:block; font-size:11px; letter-spacing:.08em; color:var(--stamp-red);
+    margin-bottom:6px; font-weight:600;
+  }
+
+  .tagrow{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin:18px 0 0;
+    padding:0 24px 22px;
+  }
+  .tag{
+    font-size:11px; letter-spacing:.03em;
+    border:1px solid var(--paper-line);
+    padding:4px 9px;
+    color:var(--ink-soft);
+  }
+
+  .record-links{
+    display:flex; gap:0;
+    border-top:1px solid var(--ink);
+  }
+  .record-links a{
+    flex:1; text-align:center;
+    padding:13px 10px;
+    font-size:12.5px;
+    letter-spacing:.05em;
+    text-decoration:none;
+    color:var(--ink);
+    border-right:1px solid var(--ink);
+    transition:background var(--dur), color var(--dur);
+  }
+  .record-links a:last-child{ border-right:none; }
+  .record-links a:hover{ background:var(--ink); color:var(--paper); }
+
+  .more-row{
+    margin-top:22px;
+    font-size:12.5px;
+    color:var(--ink-faint);
+    display:flex; align-items:center; gap:10px;
+  }
+  .more-row::before{ content:'···'; letter-spacing:.3em; }
+
+  .record-pending{
+    margin-top:18px;
+    border-style:dashed;
+    background:transparent;
+    opacity:.72;
+  }
+  .record-pending .record-head{ border-bottom-style:dashed; }
+  .record-pending h3{ color:var(--ink-faint); }
+  .stamp-pending{
+    border-color:var(--ink-faint);
+    color:var(--ink-faint);
+  }
+  .record-pending-body p{ color:var(--ink-faint); font-style:italic; font-weight:400; margin:0; }
+
+  /* ---------- contact ---------- */
+  .contact-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:40px;
+  }
+  form{ display:flex; flex-direction:column; gap:16px; }
+  .f-row{ display:flex; flex-direction:column; gap:6px; }
+  .f-row label{ font-size:11.5px; letter-spacing:.08em; color:var(--ink-faint); }
+  .f-row input, .f-row textarea{
+    font-family:var(--mono-body);
+    font-size:14px;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--ink-faint);
+    padding:9px 2px;
+    color:var(--ink);
+    outline:none;
+    resize:vertical;
+  }
+  .f-row input:focus, .f-row textarea:focus{ border-bottom:1px solid var(--stamp-red); }
+  .f-row textarea{ min-height:96px; }
+
+  button.submit{
+    margin-top:8px;
+    align-self:flex-start;
+    font-family:var(--mono-body);
+    font-size:13px; letter-spacing:.06em;
+    background:var(--ink); color:var(--paper);
+    border:1px solid var(--ink);
+    padding:12px 22px;
+    cursor:pointer;
+    transition:background var(--dur), color var(--dur);
+  }
+  button.submit:hover{ background:transparent; color:var(--ink); }
+  button.submit:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--stamp-red); outline-offset:2px;
+  }
+
+  .form-note{ font-size:11.5px; color:var(--ink-faint); margin-top:4px; }
+
+  .side-links{ display:flex; flex-direction:column; gap:0; }
+  .side-links a{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 0;
+    border-bottom:1px dashed var(--paper-line);
+    text-decoration:none;
+    font-size:14px;
+  }
+  .side-links a:first-child{ padding-top:0; }
+  .side-links .arrow{ color:var(--ink-faint); transition:transform var(--dur); }
+  .side-links a:hover .arrow{ transform:translateX(4px); color:var(--stamp-red); }
+
+  /* ---------- footer ---------- */
+  footer{
+    padding:34px 0 60px;
+    font-size:11.5px;
+    color:var(--ink-faint);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+
+  /* ---------- reveal-on-scroll (typewriter line-in) ---------- */
+  .reveal{
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .55s ease, transform .55s ease;
+  }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor{ animation:none; }
+    .reveal{ opacity:1; transform:none; transition:none; }
+    html{ scroll-behavior:auto; }
+  }
+
+  @media (max-width:640px){
+    .wrap{ padding:0 22px; }
+    .topbar-inner{ padding-left:22px; padding-right:22px; }
+    .hero{ padding:72px 0 48px; }
+    .hero-meta{ grid-template-columns:1fr 1fr; }
+    .record-fields{ grid-template-columns:1fr; }
+    .rfield{ border-right:none; border-bottom:1px dashed var(--ink-faint); }
+    .contact-grid{ grid-template-columns:1fr; }
+    .record-links{ flex-direction:column; }
+    .record-links a{ border-right:none; border-bottom:1px solid var(--ink); }
+    .record-links a:last-child{ border-bottom:none; }
+    .topbar-nav a:first-child{ display:none; }
+  }
+</style>
 </head>
-
 <body>
-  <!-- This script installs service_worker.js to provide PWA functionality to
-       application. For more information, see:
-       https://developers.google.com/web/fundamentals/primers/service-workers -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('flutter-first-frame', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=3051879133');
+
+<div class="margin-rule left"><span>field · verified · field · verified</span></div>
+<div class="margin-rule right"><span>row 001 · audited · row 001 · audited</span></div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-id"><b>v.</b> — <span class="self-tag" tabindex="0">record #001<span class="note">this page, logged as entry one — everything on it is audited the same way i'd audit any dataset.</span></span></div>
+    <nav class="topbar-nav">
+      <a href="#about">about</a>
+      <a href="#work">work</a>
+      <a href="#contact">contact</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">status: open to work</p>
+    <h1 class="type-line" id="typeTarget"></h1>
+    <p class="hero-sub">i profile, validate and audit data for a living — now building the pipelines that produce it. based in mumbai, india.</p>
+
+    <div class="hero-meta">
+      <div>
+        <span class="k">role</span>
+        <span class="v">data analyst → data engineer</span>
+      </div>
+      <div>
+        <span class="k">focus</span>
+        <span class="v">data eng. / genai</span>
+      </div>
+      <div>
+        <span class="k">experience</span>
+        <span class="v">3+ years</span>
+      </div>
+      <div>
+        <span class="k">schema</span>
+        <span class="v">lowercase, verified</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <p class="field-label"><b>01</b> / about</p>
+    <h2 class="stitle reveal">field notes</h2>
+    <div class="about-body reveal">
+      <p>i'm v., an it graduate from mumbai university, currently working as a data analyst at a media aggregation platform running on large-scale podcast and feed data.</p>
+      <p>for 3+ years my job has been finding what's wrong with a dataset before it ships: <span class="annotate" tabindex="0">profiling<span class="note">checking a dataset's shape before anyone trusts it</span></span> structured records, <span class="annotate" tabindex="0">auditing for drift<span class="note">catching when data quietly stops matching reality</span></span>, and maintaining data quality across feeds using excel, power pivot, and increasingly, ai-assisted workflows. it's taught me to <span class="annotate" tabindex="0">distrust a dataset<span class="note">rule one: verify, don't assume</span></span> until i've checked it myself.</p>
+      <p>i'm now moving that same instinct upstream — into <span class="annotate" tabindex="0">building the pipelines<span class="note">so there's less to audit later</span></span>, not just auditing what comes out of them — with a focus on data engineering and applied generative ai.</p>
+    </div>
+
+    <div class="stack-grid reveal">
+      <div class="stack-item"><span>python</span><span class="ok">✓</span></div>
+      <div class="stack-item"><span>sql / postgresql</span><span class="ok">✓</span></div>
+      <div class="stack-item"><span>dbt</span><span class="ok">✓</span></div>
+      <div class="stack-item"><span>apache airflow</span><span class="ok">✓</span></div>
+      <div class="stack-item"><span>fastapi</span><span class="ok">✓</span></div>
+      <div class="stack-item"><span>docker</span><span class="ok">✓</span></div>
+      <div class="stack-item"><span>llm apis (groq)</span><span class="ok">✓</span></div>
+      <div class="stack-item"><span>excel / power pivot</span><span class="ok">✓</span></div>
+    </div>
+
+    <div class="validator reveal">
+      <p class="field-label"><b>try it</b> / data quality check</p>
+      <p class="validator-intro">paste any sentence — i'll run it through the same dimensions i use to audit incoming data: completeness, uniqueness, consistency, and validity.</p>
+      <div class="dq-schema">
+        <span class="dq-tag">completeness</span>
+        <span class="dq-tag">uniqueness</span>
+        <span class="dq-tag">consistency</span>
+        <span class="dq-tag">validity</span>
+        <span class="dq-tag">length</span>
+      </div>
+      <input type="text" id="valInput" class="validator-input" placeholder="paste a sentence…" autocomplete="off">
+      <div id="valReport" class="val-report">
+        <span class="val-idle">awaiting input…</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <p class="field-label"><b>02</b> / projects</p>
+    <h2 class="stitle reveal">selected work</h2>
+
+    <div class="record reveal">
+      <div class="record-head">
+        <h3>content intelligence pipeline</h3>
+        <div class="stamp">verified</div>
+      </div>
+
+      <div class="record-fields">
+        <div class="rfield">
+          <span class="k">type</span>
+          <span class="v">data engineering + genai pipeline</span>
+        </div>
+        <div class="rfield">
+          <span class="k">architecture</span>
+          <span class="v">bronze → silver → gold</span>
+        </div>
+        <div class="rfield">
+          <span class="k">sources</span>
+          <span class="v">itunes search api, rss feeds</span>
+        </div>
+        <div class="rfield">
+          <span class="k">output</span>
+          <span class="v">live streamlit dashboard</span>
+        </div>
+      </div>
+
+      <div class="record-body">
+        <p>an end-to-end pipeline that ingests podcast and feed metadata via public apis, then enriches every record using an llm for content categorization, entity extraction, and quality scoring — before transforming it through a bronze → silver → gold architecture into analytics-ready tables.</p>
+        <p>orchestrated with airflow, modeled with dbt on postgresql, served through a fastapi layer, and surfaced on a live streamlit dashboard. fully containerized with docker.</p>
+
+        <div class="finding">
+          <span class="flabel">field finding</span>
+          publisher-declared genres (e.g. "science") consistently didn't match what the llm found from actually reading episode content — publisher metadata alone turned out to be unreliable for classification.
+        </div>
+      </div>
+
+      <div class="tagrow">
+        <span class="tag">python</span>
+        <span class="tag">fastapi</span>
+        <span class="tag">postgresql</span>
+        <span class="tag">dbt</span>
+        <span class="tag">airflow</span>
+        <span class="tag">groq llm api</span>
+        <span class="tag">streamlit</span>
+        <span class="tag">docker</span>
+      </div>
+
+      <div class="record-links">
+        <a href="#contact" class="repo-private" title="repo is private for now — reach out and i'll share access">↳ repo — private for now</a>
+        <a href="#contact">↳ ask about it</a>
+      </div>
+    </div>
+
+    <p class="more-row reveal">more records being audited — check back soon.</p>
+
+    <div class="record record-pending reveal">
+      <div class="record-head">
+        <h3>record #002</h3>
+        <div class="stamp stamp-pending">queued</div>
+      </div>
+      <div class="record-body record-pending-body">
+        <p>next dataset is in intake. this slot is wired up and waiting — check back for the next audited project.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <p class="field-label"><b>03</b> / contact</p>
+    <h2 class="stitle reveal">get in touch</h2>
+
+    <div class="contact-grid">
+      <div class="reveal">
+        <form action="https://formspree.io/f/mrpgbgkp" method="POST">
+          <div class="f-row">
+            <label for="name">name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="f-row">
+            <label for="email">email</label>
+            <input type="email" id="email" name="_replyto" required>
+          </div>
+          <div class="f-row">
+            <label for="message">message</label>
+            <textarea id="message" name="message" required></textarea>
+          </div>
+          <button type="submit" class="submit">submit record →</button>
+          <p class="form-note">sent via formspree — no inbox listed here on purpose.</p>
+        </form>
+      </div>
+
+      <div class="reveal">
+        <div class="side-links">
+          <a href="https://github.com/veriperi" target="_blank" rel="noopener">
+            <span>github</span><span class="arrow">→</span>
+          </a>
+          <a href="https://linkedin.com/in/vidhi-aa6860350" target="_blank" rel="noopener">
+            <span>linkedin</span><span class="arrow">→</span>
+          </a>
+          <a href="resume.pdf" target="_blank" rel="noopener">
+            <span>download résumé</span><span class="arrow">↓</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <span>© 2026 v. — all records verified by hand.</span>
+  <span>last audited: <span id="lastAudit"></span> · checksum <span id="checksum"></span></span>
+</footer>
+
+<script>
+  // typewriter hero line
+  (function(){
+    var el = document.getElementById('typeTarget');
+    var text = "hi, i'm v.\ni turn messy data into pipelines you can trust.";
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(prefersReduced){
+      el.textContent = text;
+      return;
+    }
+    var i = 0;
+    function tick(){
+      if(i <= text.length){
+        el.textContent = text.slice(0, i);
+        var cursor = document.createElement('span');
+        cursor.className = 'cursor';
+        el.appendChild(cursor);
+        i++;
+        var ch = text[i-1];
+        var delay = ch === '\n' ? 260 : (28 + Math.random()*40);
+        setTimeout(tick, delay);
+      }
+    }
+    tick();
+  })();
+
+  // scroll reveal
+  (function(){
+    var items = document.querySelectorAll('.reveal');
+    if(!('IntersectionObserver' in window)){
+      items.forEach(function(el){ el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    items.forEach(function(el){ io.observe(el); });
+  })();
+
+  // footer timestamp + fake checksum (cosmetic, derived from the date)
+  (function(){
+    var d = new Date().toISOString().slice(0,10);
+    document.getElementById('lastAudit').textContent = d;
+    var hash = 0;
+    for(var i=0;i<d.length;i++){ hash = ((hash<<5)-hash) + d.charCodeAt(i); hash |= 0; }
+    document.getElementById('checksum').textContent = Math.abs(hash).toString(16).slice(0,8);
+  })();
+
+  // live "data quality check" — mirrors real DQ dimensions: completeness, uniqueness, consistency, validity, length
+  (function(){
+    var input = document.getElementById('valInput');
+    var report = document.getElementById('valReport');
+    if(!input || !report) return;
+
+    var PLACEHOLDERS = ['test','testing','asdf','n/a','na','none','null','xxx','sample text','lorem ipsum'];
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
       });
     }
-  </script>
-  <script src="main.dart.js" type="application/javascript"></script>
-</body>
 
+    function run(raw){
+      var text = raw;
+      if(!text.trim()){
+        report.innerHTML = '<span class="val-idle">awaiting input…</span>';
+        return;
+      }
+
+      var checks = [];
+
+      // 1. completeness — not empty, not a placeholder/low-confidence value
+      var trimmedLower = text.trim().toLowerCase();
+      var isPlaceholder = PLACEHOLDERS.indexOf(trimmedLower) !== -1 || trimmedLower.indexOf('lorem ipsum') !== -1;
+      checks.push({
+        dim:'completeness', weight:25,
+        pass: !isPlaceholder,
+        v: isPlaceholder ? 'placeholder / low-confidence value detected' : 'real content present, no placeholder values'
+      });
+
+      // 2. validity — no irregular whitespace (double spaces, tabs, leading/trailing)
+      var badWhitespace = /\s{2,}/.test(text) || /\t/.test(text) || text !== text.trim();
+      checks.push({
+        dim:'validity', weight:20,
+        pass: !badWhitespace,
+        v: badWhitespace ? 'irregular whitespace found (double spaces / tabs / padding)' : 'whitespace formatting is clean'
+      });
+
+      // 3. uniqueness — no duplicate consecutive tokens
+      var words = text.trim().toLowerCase().split(/\s+/);
+      var dupe = false;
+      for(var i=1;i<words.length;i++){ if(words[i] === words[i-1]){ dupe = true; break; } }
+      checks.push({
+        dim:'uniqueness', weight:20,
+        pass: !dupe,
+        v: dupe ? 'repeated consecutive token detected' : 'no repeated tokens'
+      });
+
+      // 4. consistency — matches the site's own lowercase schema
+      var hasUpper = /[A-Z]/.test(text);
+      checks.push({
+        dim:'consistency', weight:15,
+        pass: !hasUpper,
+        v: hasUpper ? 'uppercase found — schema on this page is lowercase-only' : 'matches lowercase formatting standard'
+      });
+
+      // 5. length — within a sane field length
+      var len = text.length;
+      var tooLong = len > 140;
+      checks.push({
+        dim:'length', weight:20,
+        pass: !tooLong,
+        v: len + ' chars — ' + (tooLong ? 'exceeds recommended 140-char limit' : 'within range')
+      });
+
+      var score = 100;
+      checks.forEach(function(c){ if(!c.pass) score -= c.weight; });
+      score = Math.max(score, 0);
+
+      var html = checks.map(function(c){
+        return '<div class="val-line"><span class="dim">'+c.dim+'</span><span class="'+(c.pass?'ok':'warn')+'">'+escapeHtml(c.v)+'</span></div>';
+      }).join('');
+
+      html += '<div class="val-score"><span>data quality score</span><span class="num">'+score+'<span style="font-size:12px;color:var(--ink-faint);">/100</span></span></div>';
+
+      var verdict;
+      if(score >= 80) verdict = '<span class="val-verdict pass">record: valid</span>';
+      else if(score >= 50) verdict = '<span class="val-verdict warn">record: flagged for review</span>';
+      else verdict = '<span class="val-verdict fail">record: rejected</span>';
+
+      report.innerHTML = html + verdict;
+    }
+
+    var t;
+    input.addEventListener('input', function(){
+      clearTimeout(t);
+      var val = input.value;
+      t = setTimeout(function(){ run(val); }, 180);
+    });
+  })();
+</script>
+
+</body>
 </html>
