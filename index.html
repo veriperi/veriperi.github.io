@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>v.</title>
+<title>v. — data engineer / genai</title>
 <meta name="description" content="portfolio of v., data analyst transitioning into data engineering & generative ai.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,8 @@
     --ink-faint:#77746c;
     --stamp-red:#a8391f;
     --stamp-red-soft:#a8391f66;
+    --lilac:#8f7fae;
+    --lilac-soft:#8f7fae33;
     --card:#efeee8;
     --mono-display:'Courier Prime', 'IBM Plex Mono', monospace;
     --mono-body:'IBM Plex Mono', monospace;
@@ -58,6 +60,7 @@
     background:var(--paper-line);
     z-index:1;
     pointer-events:none;
+    overflow:visible;
   }
   .margin-rule.left{ left:calc(50% - 620px); }
   .margin-rule.right{ right:calc(50% - 620px); }
@@ -73,6 +76,49 @@
     background:var(--paper);
     padding:6px 0;
   }
+
+  /* lilac scroll-progress thread — travels down both margins as you read */
+  .progress-thread{
+    position:absolute;
+    left:50%;
+    top:0;
+    transform:translateX(-50%);
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--lilac);
+    box-shadow:0 0 0 5px var(--lilac-soft), 0 0 14px var(--lilac-soft);
+    transition:top .08s linear;
+    pointer-events:auto;
+    cursor:pointer;
+  }
+  .progress-thread::before{
+    content:'';
+    position:absolute;
+    left:50%;
+    bottom:100%;
+    width:1px;
+    height:100vh;
+    background:linear-gradient(to top, var(--lilac-soft), transparent);
+    transform:translateX(-50%);
+  }
+  .progress-thread .pct{
+    position:absolute;
+    top:50%; left:14px;
+    transform:translateY(-50%);
+    font-size:10px;
+    letter-spacing:.05em;
+    color:var(--lilac);
+    background:var(--paper);
+    padding:2px 6px;
+    border:1px solid var(--lilac-soft);
+    opacity:0;
+    transition:opacity .2s ease;
+    white-space:nowrap;
+  }
+  .margin-rule.right .progress-thread .pct{ left:auto; right:14px; }
+  .progress-thread:hover .pct{ opacity:1; }
+
   @media (min-width:1220px){
     .margin-rule{ display:block; }
   }
@@ -381,6 +427,13 @@
     display:block; font-size:11px; letter-spacing:.08em; color:var(--stamp-red);
     margin-bottom:6px; font-weight:600;
   }
+  .finding code{
+    font-family:var(--mono-body);
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    padding:1px 5px;
+    font-size:12.5px;
+  }
 
   .tagrow{
     display:flex; flex-wrap:wrap; gap:8px;
@@ -432,6 +485,64 @@
     color:var(--ink-faint);
   }
   .record-pending-body p{ color:var(--ink-faint); font-style:italic; font-weight:400; margin:0; }
+
+  /* ---------- certifications ---------- */
+  .certs-list{ margin-top:6px; }
+  .cert-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 0;
+    border-bottom:1px dashed var(--paper-line);
+    gap:16px;
+  }
+  .cert-row:last-child{ border-bottom:none; }
+  .cert-main{ display:flex; flex-direction:column; gap:4px; }
+  .cert-name{ font-size:14.5px; font-weight:600; color:var(--ink); }
+  .cert-issuer{ font-size:12px; color:var(--ink-faint); letter-spacing:.02em; }
+  .cert-verify{
+    font-size:12px; letter-spacing:.04em;
+    border:1px solid var(--ink-faint);
+    padding:6px 10px;
+    text-decoration:none;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    transition:background var(--dur), color var(--dur), border-color var(--dur);
+  }
+  .cert-verify:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  @media (max-width:640px){
+    .cert-row{ flex-direction:column; align-items:flex-start; gap:8px; }
+  }
+
+  /* floating cert badges — pinned right side, fade in once you scroll past the hero */
+  .cert-badges{
+    position:fixed;
+    top:50%;
+    right:max(20px, calc(50% - 700px));
+    transform:translateY(-50%);
+    display:none;
+    flex-direction:column;
+    gap:10px;
+    z-index:40;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .4s ease;
+  }
+  .cert-badges.show{ opacity:1; pointer-events:auto; }
+  @media (min-width:1500px){ .cert-badges{ display:flex; } }
+
+  .cert-badge{
+    background:var(--card);
+    border:1px solid var(--ink-faint);
+    padding:8px 10px;
+    font-size:10.5px;
+    letter-spacing:.03em;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    text-decoration:none;
+    display:flex; align-items:center; gap:6px;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .cert-badge:hover{ border-color:var(--ink); color:var(--ink); }
+  .cert-badge .dot{ width:6px; height:6px; border-radius:50%; background:#3f6b3f; flex-shrink:0; }
 
   /* ---------- contact ---------- */
   .contact-grid{
@@ -523,8 +634,19 @@
 </head>
 <body>
 
-<div class="margin-rule left"><span>field · verified · field · verified</span></div>
-<div class="margin-rule right"><span>row 001 · audited · row 001 · audited</span></div>
+<div class="margin-rule left">
+  <span>field · verified · field · verified</span>
+  <div class="progress-thread" id="threadLeft" title="scroll progress"><span class="pct" id="pctLeft">0%</span></div>
+</div>
+<div class="margin-rule right">
+  <span>row 001 · audited · row 001 · audited</span>
+  <div class="progress-thread" id="threadRight" title="scroll progress"><span class="pct" id="pctRight">0%</span></div>
+</div>
+
+<div class="cert-badges" id="certBadges">
+  <a href="https://skillshop.credential.net/461495ed-a406-415d-a06c-d0cf1f99fd87" target="_blank" rel="noopener" class="cert-badge"><span class="dot"></span>google analytics · verified</a>
+  <a href="https://credentials.databricks.com/c207b584-c9d9-4f9e-b3cc-4778952fdf22" target="_blank" rel="noopener" class="cert-badge"><span class="dot"></span>databricks genai · verified</a>
+</div>
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -532,6 +654,7 @@
     <nav class="topbar-nav">
       <a href="#about">about</a>
       <a href="#work">work</a>
+      <a href="#certs">certs</a>
       <a href="#contact">contact</a>
     </nav>
   </div>
@@ -568,7 +691,7 @@
     <p class="field-label"><b>01</b> / about</p>
     <h2 class="stitle reveal">field notes</h2>
     <div class="about-body reveal">
-      <p>i'm v., an it graduate from mumbai university, currently working as a data analyst at a media aggregation platform running on large-scale podcast and feed data.</p>
+      <p>i'm v., an it graduate from mumbai university, currently working as a data analyst at feedspot — a media aggregation platform running on large-scale podcast and feed data.</p>
       <p>for 3+ years my job has been finding what's wrong with a dataset before it ships: <span class="annotate" tabindex="0">profiling<span class="note">checking a dataset's shape before anyone trusts it</span></span> structured records, <span class="annotate" tabindex="0">auditing for drift<span class="note">catching when data quietly stops matching reality</span></span>, and maintaining data quality across feeds using excel, power pivot, and increasingly, ai-assisted workflows. it's taught me to <span class="annotate" tabindex="0">distrust a dataset<span class="note">rule one: verify, don't assume</span></span> until i've checked it myself.</p>
       <p>i'm now moving that same instinct upstream — into <span class="annotate" tabindex="0">building the pipelines<span class="note">so there's less to audit later</span></span>, not just auditing what comes out of them — with a focus on data engineering and applied generative ai.</p>
     </div>
@@ -657,11 +780,60 @@
       </div>
     </div>
 
+    <div class="record reveal" style="margin-top:18px;">
+      <div class="record-head">
+        <h3>e-commerce kpi dashboard</h3>
+        <div class="stamp">verified</div>
+      </div>
+
+      <div class="record-fields">
+        <div class="rfield">
+          <span class="k">type</span>
+          <span class="v">bi / data modeling</span>
+        </div>
+        <div class="rfield">
+          <span class="k">architecture</span>
+          <span class="v">8 tables, 6 relationships</span>
+        </div>
+        <div class="rfield">
+          <span class="k">sources</span>
+          <span class="v">olist brazilian e-commerce dataset (kaggle)</span>
+        </div>
+        <div class="rfield">
+          <span class="k">output</span>
+          <span class="v">interactive kpi dashboard + slicers</span>
+        </div>
+      </div>
+
+      <div class="record-body">
+        <p>a relational data model and interactive kpi dashboard built entirely in excel — power pivot + dax — on 99,441 real marketplace orders. instead of flattening everything into one sheet, the model uses 8 normalized tables connected through 6 defined relationships, with every business metric written as a proper dax measure on top: total revenue, aov, repeat purchase rate, late delivery %, and average review score.</p>
+        <p>order payments were deliberately left unconnected in the model — an order can span multiple payment rows across installments, so joining it directly would double-count revenue. aggregation uses sumx instead, calculated in the measure rather than assumed from a relationship.</p>
+
+        <div class="finding">
+          <span class="flabel">field finding</span>
+          the dataset's <code>customer_id</code> is generated per order, not per person — <code>customer_unique_id</code> is the real person-level key. using the wrong one would have silently inflated the repeat purchase rate. caught during modeling, corrected before writing the measure.
+        </div>
+      </div>
+
+      <div class="tagrow">
+        <span class="tag">excel</span>
+        <span class="tag">power pivot</span>
+        <span class="tag">dax</span>
+        <span class="tag">pivotcharts</span>
+        <span class="tag">slicers</span>
+      </div>
+
+      <div class="record-links">
+        <a href="https://github.com/veriperi/ecommerce-kpi-dashboard" target="_blank" rel="noopener">↳ view repo</a>
+        <a href="#contact">↳ ask about it</a>
+      </div>
+    </div>
+
     <p class="more-row reveal">more records being audited — check back soon.</p>
 
     <div class="record record-pending reveal">
       <div class="record-head">
-        <h3>record #002</h3>
+        <h3>record #003</h3>
         <div class="stamp stamp-pending">queued</div>
       </div>
       <div class="record-body record-pending-body">
@@ -670,13 +842,34 @@
     </div>
   </section>
 
+  <section id="certs">
+    <p class="field-label"><b>03</b> / certifications</p>
+    <h2 class="stitle reveal">verified credentials</h2>
+    <div class="certs-list reveal">
+      <div class="cert-row">
+        <div class="cert-main">
+          <span class="cert-name">google analytics certification</span>
+          <span class="cert-issuer">google skillshop · aug 2026</span>
+        </div>
+        <a href="https://skillshop.credential.net/461495ed-a406-415d-a06c-d0cf1f99fd87" target="_blank" rel="noopener" class="cert-verify">verify ↗</a>
+      </div>
+      <div class="cert-row">
+        <div class="cert-main">
+          <span class="cert-name">generative ai fundamentals</span>
+          <span class="cert-issuer">databricks · sep 2026</span>
+        </div>
+        <a href="https://credentials.databricks.com/c207b584-c9d9-4f9e-b3cc-4778952fdf22" target="_blank" rel="noopener" class="cert-verify">verify ↗</a>
+      </div>
+    </div>
+  </section>
+
   <section id="contact">
-    <p class="field-label"><b>03</b> / contact</p>
+    <p class="field-label"><b>04</b> / contact</p>
     <h2 class="stitle reveal">get in touch</h2>
 
     <div class="contact-grid">
       <div class="reveal">
-        <form action="https://formspree.io/f/mrpgbgkp" method="POST">
+        <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
           <div class="f-row">
             <label for="name">name</label>
             <input type="text" id="name" name="name" required>
@@ -696,10 +889,10 @@
 
       <div class="reveal">
         <div class="side-links">
-          <a href="https://github.com/veriperi" target="_blank" rel="noopener">
+          <a href="https://github.com/YOUR_USERNAME" target="_blank" rel="noopener">
             <span>github</span><span class="arrow">→</span>
           </a>
-          <a href="https://linkedin.com/in/veriperi" target="_blank" rel="noopener">
+          <a href="https://linkedin.com/in/vidhi-aa6860350" target="_blank" rel="noopener">
             <span>linkedin</span><span class="arrow">→</span>
           </a>
           <a href="resume.pdf" target="_blank" rel="noopener">
@@ -759,6 +952,60 @@
       });
     }, { threshold: 0.15 });
     items.forEach(function(el){ io.observe(el); });
+  })();
+
+  // lilac scroll-progress thread — travels down both margins as you read
+  (function(){
+    var threadL = document.getElementById('threadLeft');
+    var threadR = document.getElementById('threadRight');
+    var pctL = document.getElementById('pctLeft');
+    var pctR = document.getElementById('pctRight');
+    if(!threadL || !threadR) return;
+
+    var ticking = false;
+    function update(){
+      var scrollTop = window.scrollY || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var ratio = docHeight > 0 ? Math.min(Math.max(scrollTop / docHeight, 0), 1) : 0;
+      var topPx = ratio * window.innerHeight;
+      threadL.style.top = topPx + 'px';
+      threadR.style.top = topPx + 'px';
+      var pctText = Math.round(ratio * 100) + '%';
+      pctL.textContent = pctText;
+      pctR.textContent = pctText;
+      ticking = false;
+    }
+    function onScroll(){
+      if(!ticking){
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    update();
+
+    // click the thread to jump back to the top
+    [threadL, threadR].forEach(function(el){
+      el.addEventListener('click', function(){
+        window.scrollTo({ top:0, behavior:'smooth' });
+      });
+    });
+  })();
+
+  // fade in the floating cert badges once you scroll past the hero
+  (function(){
+    var badges = document.getElementById('certBadges');
+    if(!badges) return;
+    function toggle(){
+      if(window.scrollY > window.innerHeight * 0.6){
+        badges.classList.add('show');
+      } else {
+        badges.classList.remove('show');
+      }
+    }
+    window.addEventListener('scroll', toggle, { passive:true });
+    toggle();
   })();
 
   // footer timestamp + fake checksum (cosmetic, derived from the date)
