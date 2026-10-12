@@ -695,7 +695,7 @@
 <div class="cert-badges" id="certBadges">
   <a href="https://skillshop.credential.net/461495ed-a406-415d-a06c-d0cf1f99fd87" target="_blank" rel="noopener" class="cert-badge"><span class="dot"></span>google analytics · verified</a>
   <a href="https://credentials.databricks.com/c207b584-c9d9-4f9e-b3cc-4778952fdf22" target="_blank" rel="noopener" class="cert-badge"><span class="dot"></span>databricks genai · verified</a>
-  <a href="PASTE VERIFY LINK HERE" target="_blank" rel="noopener" class="cert-badge"><span class="dot"></span>sql (intmd) hackerrank · verified</a>
+  <a href="https://www.hackerrank.com/certificates/e6f267ec3825" target="_blank" rel="noopener" class="cert-badge"><span class="dot"></span>sql (intmd) hackerrank · verified</a>
 </div>
 
 <div class="topbar">
@@ -769,6 +769,15 @@
   <p class="acc-last">last push · <b id="ghLastRepo">–</b> · <span id="ghLastWhen">–</span></p>
 </div>
 <p class="acc-note" id="ghNote" hidden>live stats unavailable right now.</p>
+
+    <a class="acc-row" href="https://stackoverflow.com/users/14844720/veriperi" target="_blank" rel="noopener">
+  <span>stack overflow</span><span class="acc-status" id="soStatus">syncing…</span>
+</a>
+<div id="soLive">
+  <div class="acc-stat"><span class="acc-num" id="soRep">–</span><span class="acc-unit">reputation</span></div>
+  <p class="acc-last">badges · gold <b id="soGold">–</b> · silver <b id="soSilver">–</b> · bronze <b id="soBronze">–</b></p>
+</div>
+<p class="acc-note" id="soNote" hidden>live stats unavailable right now.</p>
     
     <a class="acc-row" href="https://www.hackerrank.com/profile/veriperi" target="_blank" rel="noopener">
       <span>hackerrank</span><span class="arrow">↗</span>
@@ -1214,7 +1223,44 @@
     show(d);
   }).catch(fail);
 })();
+// stack overflow live stats (official stack exchange api, cached 10 min)
+(function(){
+  var status = document.getElementById('soStatus');
+  if(!status) return;
+  var ID = '14844720';
+  var KEY = 'so-live-' + ID;
 
+  function show(d){
+    document.getElementById('soRep').textContent = Number(d.rep).toLocaleString();
+    document.getElementById('soGold').textContent = d.gold;
+    document.getElementById('soSilver').textContent = d.silver;
+    document.getElementById('soBronze').textContent = d.bronze;
+    status.textContent = 'live';
+    status.classList.add('live');
+  }
+  function fail(){
+    document.getElementById('soLive').hidden = true;
+    document.getElementById('soNote').hidden = false;
+    status.textContent = 'offline';
+  }
+
+  try {
+    var c = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+    if(c && Date.now() - c.t < 600000){ show(c.d); return; }
+  } catch(e){}
+
+  fetch('https://api.stackexchange.com/2.3/users/' + ID + '?site=stackoverflow')
+    .then(function(r){ if(!r.ok) throw new Error('bad status'); return r.json(); })
+    .then(function(data){
+      var u = data && data.items && data.items[0];
+      if(!u || typeof u.reputation !== 'number') throw new Error('bad shape');
+      var b = u.badge_counts || {};
+      var d = { rep: u.reputation, gold: b.gold || 0, silver: b.silver || 0, bronze: b.bronze || 0 };
+      try { sessionStorage.setItem(KEY, JSON.stringify({ t: Date.now(), d: d })); } catch(e){}
+      show(d);
+    })
+    .catch(fail);
+})();
   
   // footer timestamp + fake checksum (cosmetic, derived from the date)
   (function(){
