@@ -586,6 +586,8 @@
 .acc-bar .track{ height:5px; border-bottom:1px dashed var(--ink-faint); position:relative; }
 .acc-bar .fill{ position:absolute; left:0; bottom:-1px; height:5px; width:0; background:var(--ink); transition:width .9s ease; }
 .acc-bar .n{ text-align:right; color:var(--ink); }
+.acc-last{ margin:0 0 12px; color:var(--ink-soft); line-height:1.5; }
+.acc-last b{ color:var(--ink); font-weight:600; word-break:break-word; }
 .acc-note{ margin:0 0 12px; color:var(--ink-faint); font-size:11.5px; }
 @media (max-width:820px){
   .about-grid{ grid-template-columns:1fr; gap:28px; }
@@ -743,6 +745,7 @@
       <p>for 3+ years my job has been finding what's wrong with a dataset before it ships: <span class="annotate" tabindex="0">profiling<span class="note">checking a dataset's shape before anyone trusts it</span></span> structured records, <span class="annotate" tabindex="0">auditing for drift<span class="note">catching when data quietly stops matching reality</span></span>, and maintaining data quality across feeds using excel, power pivot, and increasingly, ai-assisted workflows. it's taught me to <span class="annotate" tabindex="0">distrust a dataset<span class="note">rule one: verify, don't assume</span></span> until i've checked it myself.</p>
       <p>i'm now moving that same instinct upstream — into <span class="annotate" tabindex="0">building the pipelines<span class="note">so there's less to audit later</span></span>, not just auditing what comes out of them — with a focus on data engineering and applied generative ai.</p>
     </div>
+      
   <aside class="accounts reveal" aria-label="linked coding accounts">
     <p class="acc-label">linked accounts</p>
     <a class="acc-row" href="https://leetcode.com/u/veriperi/" target="_blank" rel="noopener">
@@ -757,6 +760,15 @@
       </div>
     </div>
     <p class="acc-note" id="lcNote" hidden>live stats unavailable right now.</p>
+    <a class="acc-row" href="https://github.com/veriperi" target="_blank" rel="noopener">
+  <span>github</span><span class="acc-status" id="ghStatus">syncing…</span>
+</a>
+<div id="ghLive">
+  <div class="acc-stat"><span class="acc-num" id="ghRepos">–</span><span class="acc-unit">public repos</span></div>
+  <p class="acc-last">last push · <b id="ghLastRepo">–</b> · <span id="ghLastWhen">–</span></p>
+</div>
+<p class="acc-note" id="ghNote" hidden>live stats unavailable right now.</p>
+    
     <a class="acc-row" href="https://www.hackerrank.com/profile/veriperi" target="_blank" rel="noopener">
       <span>hackerrank</span><span class="arrow">↗</span>
     </a>
@@ -1143,6 +1155,58 @@
   }
   tryNext(0);
 })();
+
+  // github live stats (official public api, cached for 10 min to stay under the rate limit)
+(function(){
+  var status = document.getElementById('ghStatus');
+  if(!status) return;
+  var USER = 'veriperi';
+  var KEY = 'gh-live-' + USER;
+
+  function ago(iso){
+    var s = Math.max(1, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+    var u = [[31536000,'y'],[2592000,'mo'],[86400,'d'],[3600,'h'],[60,'m']];
+    for(var i=0;i<u.length;i++){
+      if(s >= u[i][0]) return Math.floor(s / u[i][0]) + u[i][1] + ' ago';
+    }
+    return 'just now';
+  }
+  function show(d){
+    document.getElementById('ghRepos').textContent = d.repos;
+    document.getElementById('ghLastRepo').textContent = d.repo || '–';
+    document.getElementById('ghLastWhen').textContent = d.pushed ? ago(d.pushed) : '–';
+    status.textContent = 'live';
+    status.classList.add('live');
+  }
+  function fail(){
+    document.getElementById('ghLive').hidden = true;
+    document.getElementById('ghNote').hidden = false;
+    status.textContent = 'offline';
+  }
+  function getJSON(url){
+    return fetch(url, { headers: { 'Accept': 'application/vnd.github+json' } }).then(function(r){
+      if(!r.ok) throw new Error('bad status');
+      return r.json();
+    });
+  }
+
+  try {
+    var c = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+    if(c && Date.now() - c.t < 600000){ show(c.d); return; }
+  } catch(e){}
+
+  Promise.all([
+    getJSON('https://api.github.com/users/' + USER),
+    getJSON('https://api.github.com/users/' + USER + '/repos?sort=pushed&per_page=1')
+  ]).then(function(res){
+    var u = res[0], r = res[1] && res[1][0];
+    if(typeof u.public_repos !== 'number') throw new Error('bad shape');
+    var d = { repos: u.public_repos, repo: r ? r.name : null, pushed: r ? r.pushed_at : null };
+    try { sessionStorage.setItem(KEY, JSON.stringify({ t: Date.now(), d: d })); } catch(e){}
+    show(d);
+  }).catch(fail);
+})();
+
   
   // footer timestamp + fake checksum (cosmetic, derived from the date)
   (function(){
